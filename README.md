@@ -3,6 +3,7 @@ A journey through learning Rust with code samples, exercises, and course materia
 
 - Course
     - [google/comprehensive-rust](https://google.github.io/comprehensive-rust) | 🤖[Exercise](/comprehensive-rust/)
+    - [exercism-rust](https://exercism.org/tracks/rust)
 - Terminal UI
     - [ratatui](https://ratatui.rs/) | 🤖[Exercise](/ratatui/)
 - Command Line Tool
