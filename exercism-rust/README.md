@@ -6,5 +6,6 @@ Solve coding exercises and get mentored to develop fluency in your chosen progra
 
 ## Tricky Tests
 
+- [alphametics](./alphametics)
 - [variable-length-quantity](./variable-length-quantity)
 - [book-store](./book-store)
