@@ -69,6 +69,14 @@ npx @modelcontextprotocol/inspector -e COINMARKETCAP_API_KEY=xxxx cargo run
 npx @modelcontextprotocol/inspector -e COINMARKETCAP_API_KEY=xxxx rmcp-coinmarketcap
 ```
 
+## Reference
+
+- [CoinMarketCap API Documentation](https://coinmarketcap.com/api/documentation/v1/)
+- [Model Context Protocol](https://modelcontextprotocol.io/introduction)
+- [RMCP](https://github.com/modelcontextprotocol/rust-sdk)
+- [MCP Rust CLI server template](https://github.com/linux-china/mcp-rs-template)
+- [MCP Containerd](https://github.com/jokemanfire/mcp-containerd)
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
