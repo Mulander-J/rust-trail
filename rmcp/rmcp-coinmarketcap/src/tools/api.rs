@@ -2,7 +2,7 @@ use rmcp::{
     model::{ServerCapabilities, ServerInfo},
     schemars, tool, ServerHandler,
 };
-use serde::Deserialize;
+// use serde::Deserialize;
 
 const BASE_URL: &str = "https://pro-api.coinmarketcap.com/v1";
 
@@ -98,25 +98,19 @@ impl ServerHandler for CMCAPI {
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
 pub struct QuoteRequest {
     #[schemars(
-        description = "Alternatively pass one or more comma-separated cryptocurrency symbols. Example: \"BTC,ETH\". At least one \"slug\" or \"symbol\" is required for this request.",
-        required = false
+        description = "Pass one or more comma-separated cryptocurrency symbols (e.g. \"BTC,ETH\"). If not using symbols, provide an empty string and use slug instead."
     )]
-    #[serde(deserialize_with = "deserialize_convert")]
-    pub symbol: Option<String>,
+    pub symbol: String,
 
     #[schemars(
-        description = "Alternatively pass one or more comma-separated cryptocurrency slugs. Example: \"bitcoin,ethereum\". At least one \"slug\" or \"symbol\" is required for this request.",
-        required = false
+        description = "Pass one or more comma-separated cryptocurrency slugs (e.g. \"bitcoin,ethereum\"). If not using slugs, provide an empty string and use symbol instead."
     )]
-    #[serde(deserialize_with = "deserialize_convert")]
-    pub slug: Option<String>,
+    pub slug: String,
 
     #[schemars(
-        description = "Optionally calculate market quotes in up to 120 currencies at once by passing a comma-separated list of cryptocurrency or fiat currency symbols. Each additional convert option beyond the first requires an additional call credit. A list of supported fiat options can be found here. Each conversion is returned in its own \"quote\" object.",
-        required = false
+        description = "Calculate market quotes in specified currencies by passing comma-separated currency symbols (e.g. \"USD,CNY\"). Defaults to USD if empty string is provided."
     )]
-    #[serde(deserialize_with = "deserialize_convert")]
-    pub convert: Option<String>,
+    pub convert: String,
 }
 
 /// Custom deserializer for Option<String> fields
@@ -128,53 +122,69 @@ pub struct QuoteRequest {
 /// # Returns
 ///
 /// Returns processed Option<String>, empty strings will be converted to None
-fn deserialize_convert<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
-where
-    D: serde::Deserializer<'de>,
-{
-    let s: Option<String> = Option::deserialize(deserializer)?;
-    Ok(s.and_then(|s| {
-        let trimmed = s.trim();
-        if trimmed.is_empty() {
-            None
-        } else {
-            Some(trimmed.to_string())
-        }
-    }))
-}
+// fn deserialize_convert<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+// where
+//     D: serde::Deserializer<'de>,
+// {
+//     let s: Option<String> = Option::deserialize(deserializer)?;
+//     Ok(s.and_then(|s| {
+//         let trimmed = s.trim();
+//         if trimmed.is_empty() {
+//             None
+//         } else {
+//             Some(trimmed.to_string())
+//         }
+//     }))
+// }
 
 impl QuoteRequest {
     /// Validates the request parameters
     ///
-    /// # Returns
+    /// # Rules
+    /// - Either symbol or slug must be provided (non-empty)
+    /// - Cannot provide both symbol and slug (one must be empty)
+    /// - Convert will default to USD if empty
     ///
+    /// # Examples
+    /// ```
+    /// let valid_request = QuoteRequest {
+    ///     symbol: "BTC".to_string(),
+    ///     slug: "".to_string(),      // Empty when using symbol
+    ///     convert: "USD".to_string(),
+    /// };
+    /// ```
+    ///
+    /// # Returns
     /// * `Ok(())` - Parameters are valid
     /// * `Err(String)` - Parameters are invalid, contains error message
     pub fn validate(&self) -> Result<(), String> {
-        if self.symbol.is_none() && self.slug.is_none() {
+        if self.symbol.trim().is_empty() && self.slug.trim().is_empty() {
             return Err("At least one of symbol or slug is required".to_string());
         }
-        if self.symbol.is_some() && self.slug.is_some() {
-            return Err("Only one of symbol or slug is required".to_string());
+        if !self.symbol.trim().is_empty() && !self.slug.trim().is_empty() {
+            return Err("Only one of symbol or slug should be provided (use empty string for unused field)".to_string());
         }
         Ok(())
     }
 
     /// Gets the query parameters list
     ///
-    /// # Returns
+    /// # Notes
+    /// - Automatically handles empty convert parameter by defaulting to USD
+    /// - Only includes non-empty symbol or slug parameter
     ///
+    /// # Returns
     /// Returns a list of query parameters as tuples of (key, value)
     pub fn get_querys(&self) -> Vec<(&str, String)> {
         let mut querys = vec![(
             "convert",
-            self.convert.as_deref().unwrap_or("USD").to_string(),
+            if self.convert.trim().is_empty() { "USD".to_string() } else { self.convert.clone() }
         )];
 
-        if let Some(slug) = &self.slug {
-            querys.push(("slug", slug.clone()));
-        } else if let Some(symbol) = &self.symbol {
-            querys.push(("symbol", symbol.clone()));
+        if !self.slug.trim().is_empty() {
+            querys.push(("slug", self.slug.clone()));
+        } else if !self.symbol.trim().is_empty() {
+            querys.push(("symbol", self.symbol.clone()));
         }
         querys
     }
