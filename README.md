@@ -8,7 +8,9 @@ A systematic exploration through the realm of Rust, where code doth compile, kno
 - Terminal UI
   - [ratatui](https://ratatui.rs/) > 🤖[Exercise](/ratatui/)
 - Command Line Tool
-  - [clap](https://github.com/clap-rs/clap) > 📦[EulerR](https://github.com/Mulander-J/eulerr)
+  - [clap](https://github.com/clap-rs/clap)
+    - [📦EulerR](https://github.com/Mulander-J/eulerr)
+    - [🦣 Mammoth CLI ❄️](https://github.com/Mulander-J/mammoth-cli)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction)
   - [rmcp](https://github.com/modelcontextprotocol/rust-sdk) > [rmcp-coinmarketcap](/rmcp/rmcp-coinmarketcap)
 - Multi-platform Application
